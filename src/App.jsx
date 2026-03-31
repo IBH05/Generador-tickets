@@ -67,11 +67,9 @@ const App = () => {
       `*Total Pagado:* ${formattedTotal}\n\n` +
       `*Folio:* ${folio}\n` +
       `*Fecha:* ${date}\n\n` +
-      `_Gracias por tu preferencia. Este es un comprobante digital._`;
+      `_Gracias por tu preferencia._`;
 
     const cleanPhone = clientPhone.replace(/\D/g, '');
-    
-    // DETECCIÓN DE PC PARA USAR WEB.WHATSAPP.COM
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     const baseUrl = isMobile ? "https://api.whatsapp.com/send" : "https://web.whatsapp.com/send";
     
@@ -90,16 +88,48 @@ const App = () => {
 
   return (
     <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans">
+      
+      {/* CORRECCIÓN DE ESTILOS DE IMPRESIÓN PARA EPSON 80mm */}
       <style>{`
         @media print {
-          .no-print { display: none !important; }
-          .print-area { display: block !important; width: 80mm !important; margin: 0; padding: 5mm; color: black !important; position: relative; }
-          .watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; width: 70%; z-index: 0; }
+          @page {
+            margin: 0 !important; /* Quita el margen que pone Chrome por defecto */
+          }
+          body {
+            background-color: white !important;
+            margin: 0 !important;
+            padding: 0 !important;
+          }
+          /* Ocultar el formulario izquierdo */
+          .form-panel {
+            display: none !important;
+          }
+          /* Resetear el panel derecho para que no tenga fondos grises */
+          .preview-panel {
+            width: 100% !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            border: none !important;
+            background-color: white !important;
+            display: block !important;
+          }
+          /* Ajustar el ticket a 80mm exactos */
+          .print-area {
+            width: 76mm !important; /* 76mm para dar un ligero margen en la epson de 80mm */
+            margin: 0 !important;
+            padding: 5mm 2mm !important;
+            box-shadow: none !important;
+            color: black !important;
+            min-height: auto !important; /* Para que no corte mucho papel abajo */
+          }
+          .watermark {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; width: 70%; z-index: 0; 
+          }
         }
       `}</style>
 
-      {/* PANEL IZQUIERDO */}
-      <div className="w-full md:w-1/2 lg:w-3/5 p-6 md:p-10 overflow-y-auto no-print">
+      {/* PANEL IZQUIERDO: FORMULARIO */}
+      <div className="form-panel w-full md:w-1/2 lg:w-3/5 p-6 md:p-10 overflow-y-auto">
         <div className="max-w-xl mx-auto">
           <div className="flex items-center gap-3 mb-8 text-blue-800">
             <FileText size={32} />
@@ -161,35 +191,48 @@ const App = () => {
         </div>
       </div>
 
-      {/* VISTA PREVIA TICKET */}
-      <div className="w-full md:w-1/2 lg:w-2/5 bg-gray-200 flex items-center justify-center p-8 border-l no-print">
+      {/* PANEL DERECHO: VISTA PREVIA TICKET */}
+      <div className="preview-panel w-full md:w-1/2 lg:w-2/5 bg-gray-200 flex items-center justify-center p-8 border-l">
         <div className="print-area bg-white shadow-2xl p-6 w-[80mm] min-h-[100mm] text-sm relative overflow-hidden">
           <div className="watermark absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.08] w-[80%] pointer-events-none flex justify-center items-center">
             {getWatermark()}
           </div>
-          <div className="relative z-10 font-mono">
+          <div className="relative z-10 font-mono text-black">
             <div className="text-center mb-4">
-              <h2 className="font-bold text-lg">{businessName}</h2>
-              <p className="text-[10px]">COMPROBANTE DE PAGO</p>
+              <h2 className="font-bold text-lg leading-tight">{businessName}</h2>
+              <p className="text-[10px] uppercase mt-1">COMPROBANTE DE PAGO</p>
               <p>-------------------------</p>
             </div>
-            <div className="text-xs space-y-1">
+            <div className="text-[11px] space-y-1">
               <div className="flex justify-between"><span>FECHA:</span><span>{date.split(',')[0]}</span></div>
+              <div className="flex justify-between"><span>HORA:</span><span>{date.split(',')[1]?.trim() || ''}</span></div>
               <div className="flex justify-between"><span>FOLIO:</span><span>{folio}</span></div>
-              <div className="border-t border-dashed my-2 pt-2">SERVICIO:</div>
-              <div className="font-bold">{serviceName || '-'}</div>
-              <div className="border-t border-dashed my-2 pt-2">CUENTA:</div>
-              <div className="font-bold break-all">{account || '-'}</div>
+              <div className="border-t border-dashed border-gray-400 my-2 pt-2">SERVICIO:</div>
+              <div className="font-bold text-[13px] uppercase leading-tight">{serviceName || '-'}</div>
+              <div className="border-t border-dashed border-gray-400 my-2 pt-2">CUENTA:</div>
+              <div className="font-bold text-[13px] break-all">{account || '-'}</div>
             </div>
             <p className="text-center my-2">-------------------------</p>
-            <div className="space-y-1 text-xs">
+            <div className="space-y-1 text-[12px]">
               <div className="flex justify-between"><span>MONTO:</span><span>${numAmount.toFixed(2)}</span></div>
               <div className="flex justify-between"><span>COMISIÓN:</span><span>${numCommission.toFixed(2)}</span></div>
-              <div className="flex justify-between font-bold text-base border-t pt-1"><span>TOTAL:</span><span>${totalAmount.toFixed(2)}</span></div>
+              <div className="flex justify-between font-bold text-[14px] border-t border-black pt-1 mt-1"><span>TOTAL:</span><span>${totalAmount.toFixed(2)}</span></div>
             </div>
             <div className="text-center mt-6 text-[10px]">
               <p className="font-bold">*** PAGO EXITOSO ***</p>
-              <p>Conserve este ticket para aclaraciones.</p>
+              <p className="mt-2">Conserve este ticket para</p>
+              <p>cualquier aclaración.</p>
+              <p className="mt-2 mb-4 font-bold">¡Gracias por su preferencia!</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
+
             </div>
           </div>
         </div>
