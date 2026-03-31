@@ -1,7 +1,7 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
 import { Printer, MessageCircle, FileText, Settings, Clock, RefreshCw } from 'lucide-react';
 
-// Logos optimizados para marcas de agua térmicas
 const logos = {
   cfe: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 1,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 1,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 1,0 16,12A4,4 0 0,0 12,8M12,10A2,2 0 1,1 10,12A2,2 0 0,1 12,10Z" /></svg>,
   agua: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C8,2 4,6 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,6 16,2 12,2M12,4C16.42,4 20,7.58 20,12C20,16.42 16.42,20 12,20C7.58,20 4,16.42 4,12C4,7.58 7.58,4 12,4M12,6A6,6 0 1,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 1,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 1,0 14,12A2,2 0 0,0 12,10Z" /></svg>,
@@ -10,6 +10,9 @@ const logos = {
 };
 
 const App = () => {
+  // Referencia para la librería de impresión
+  const ticketRef = useRef();
+
   const [businessName, setBusinessName] = useState('MI NEGOCIO MULTISERVICIOS');
   const [serviceName, setServiceName] = useState('');
   const [account, setAccount] = useState('');
@@ -41,6 +44,16 @@ const App = () => {
   const numAmount = parseFloat(amount || 0);
   const numCommission = parseFloat(commission || 0);
   const totalAmount = numAmount + numCommission;
+
+  // Configuración de react-to-print
+  const handlePrint = useReactToPrint({
+    content: () => ticketRef.current,
+    documentTitle: `Ticket_${folio}`,
+    pageStyle: `
+      @page { size: 80mm auto; margin: 0; }
+      body { margin: 0; padding: 0; background-color: white; color: black; font-family: 'Courier New', Courier, monospace; }
+    `,
+  });
 
   const handleWhatsApp = () => {
     if (!clientPhone) {
@@ -88,55 +101,10 @@ const App = () => {
   };
 
   return (
-    <div className="main-wrapper min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans">
+    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans">
       
-      {/* ESTILOS DE IMPRESIÓN MEJORADOS PARA TÉRMICAS 80MM */}
-      <style>{`
-        @media print {
-          @page { 
-            margin: 0 !important; 
-            size: 80mm auto; 
-          }
-          html, body { 
-            background-color: white !important; 
-            margin: 0 !important; 
-            padding: 0 !important;
-            height: auto !important;
-          }
-          .form-panel, button {
-            display: none !important;
-          }
-          .main-wrapper, .preview-panel {
-            display: block !important;
-            width: 100% !important;
-            margin: 0 !important;
-            padding: 0 !important;
-            background: white !important;
-          }
-          .print-area {
-            position: relative !important;
-            width: 76mm !important;
-            margin: 0 !important;
-            padding: 4mm 2mm !important;
-            box-shadow: none !important;
-            color: black !important;
-            font-family: 'Courier New', Courier, monospace !important;
-          }
-          .watermark {
-            position: absolute !important; 
-            top: 50% !important; 
-            left: 50% !important; 
-            transform: translate(-50%, -50%) !important; 
-            opacity: 0.15 !important; 
-            width: 60% !important; 
-            z-index: 0 !important; 
-            filter: grayscale(100%) !important;
-          }
-        }
-      `}</style>
-
       {/* PANEL IZQUIERDO: FORMULARIO */}
-      <div className="form-panel w-full md:w-1/2 lg:w-3/5 p-6 md:p-10 overflow-y-auto">
+      <div className="w-full md:w-1/2 lg:w-3/5 p-6 md:p-10 overflow-y-auto">
         <div className="max-w-xl mx-auto">
           <div className="flex items-center gap-3 mb-8 text-blue-800">
             <FileText size={32} />
@@ -186,10 +154,10 @@ const App = () => {
           </div>
 
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <button onClick={() => window.print()} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-slate-900">
+            <button onClick={handlePrint} className="flex-1 flex items-center justify-center gap-2 bg-slate-800 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-slate-900 transition-transform active:scale-95">
               <Printer size={24} /> IMPRIMIR
             </button>
-            <button onClick={handleWhatsApp} className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-600">
+            <button onClick={handleWhatsApp} className="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white py-4 rounded-xl font-bold shadow-lg hover:bg-green-600 transition-transform active:scale-95">
               <MessageCircle size={24} /> WHATSAPP
             </button>
           </div>
@@ -197,12 +165,15 @@ const App = () => {
       </div>
 
       {/* PANEL DERECHO: VISTA PREVIA TICKET */}
-      <div className="preview-panel w-full md:w-1/2 lg:w-2/5 bg-gray-200 flex items-center justify-center p-8 border-l">
-        <div className="print-area bg-white shadow-2xl p-6 w-[80mm] min-h-[100mm] text-sm relative overflow-hidden">
-          <div className="watermark absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-[0.08] w-[80%] pointer-events-none flex justify-center items-center">
+      <div className="w-full md:w-1/2 lg:w-2/5 bg-gray-200 flex items-center justify-center p-8 border-l">
+        {/* Aquí conectamos ticketRef para que solo se imprima este div */}
+        <div ref={ticketRef} className="bg-white p-6 w-[80mm] text-sm relative overflow-hidden text-black font-mono shadow-xl mx-auto">
+          
+          <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 opacity-15 w-[60%] pointer-events-none flex justify-center items-center grayscale">
             {getWatermark()}
           </div>
-          <div className="relative z-10 font-mono text-black">
+          
+          <div className="relative z-10">
             <div className="text-center mb-4">
               <h2 className="font-bold text-lg leading-tight">{businessName}</h2>
               <p className="text-[10px] uppercase mt-1">COMPROBANTE DE PAGO</p>
