@@ -232,13 +232,3 @@ const App = () => {
 };
 
 export default App;
-
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default App;
