@@ -87,43 +87,51 @@ const App = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans">
+    <div className="main-wrapper min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans">
       
-      {/* CORRECCIÓN DE ESTILOS DE IMPRESIÓN PARA EPSON 80mm */}
+      {/* CORRECCIÓN EXTREMA DE ESTILOS DE IMPRESIÓN */}
       <style>{`
         @media print {
-          @page {
-            margin: 0 !important; /* Quita el margen que pone Chrome por defecto */
+          /* 1. Resetear la página y el fondo */
+          @page { margin: 0 !important; }
+          html, body { 
+            background-color: white !important; 
+            margin: 0 !important; 
+            padding: 0 !important; 
+            height: auto !important;
           }
-          body {
-            background-color: white !important;
-            margin: 0 !important;
-            padding: 0 !important;
+          
+          /* 2. Ocultar todo por defecto usando visibility para evitar que colapse el layout */
+          body * {
+            visibility: hidden;
           }
-          /* Ocultar el formulario izquierdo */
-          .form-panel {
-            display: none !important;
+          
+          /* 3. Hacer visible SOLAMENTE el área de impresión y sus hijos */
+          .print-area, .print-area * {
+            visibility: visible;
           }
-          /* Resetear el panel derecho para que no tenga fondos grises */
-          .preview-panel {
-            width: 100% !important;
-            padding: 0 !important;
-            margin: 0 !important;
-            border: none !important;
-            background-color: white !important;
-            display: block !important;
-          }
-          /* Ajustar el ticket a 80mm exactos */
+          
+          /* 4. Arrancar el ticket de su lugar y pegarlo arriba a la izquierda */
           .print-area {
-            width: 76mm !important; /* 76mm para dar un ligero margen en la epson de 80mm */
+            position: absolute !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 76mm !important; /* Ligeramente menor a 80mm para evitar cortes */
             margin: 0 !important;
-            padding: 5mm 2mm !important;
+            padding: 2mm 4mm !important;
             box-shadow: none !important;
             color: black !important;
-            min-height: auto !important; /* Para que no corte mucho papel abajo */
           }
+
+          /* 5. Asegurar que las marcas de agua mantengan su posición relativa dentro del ticket */
           .watermark {
-            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; width: 70%; z-index: 0; 
+            position: absolute !important; 
+            top: 50% !important; 
+            left: 50% !important; 
+            transform: translate(-50%, -50%) !important; 
+            opacity: 0.05 !important; 
+            width: 70% !important; 
+            z-index: 0 !important; 
           }
         }
       `}</style>
