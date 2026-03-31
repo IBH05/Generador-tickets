@@ -13,7 +13,7 @@ const App = () => {
   // Referencia para la librería de impresión
   const ticketRef = useRef();
 
-  const [businessName, setBusinessName] = useState('MI NEGOCIO MULTISERVICIOS');
+  const [businessName, setBusinessName] = useState('ECONOSUPER');
   const [serviceName, setServiceName] = useState('');
   const [account, setAccount] = useState('');
   const [amount, setAmount] = useState('');
