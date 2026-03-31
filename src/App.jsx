@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Printer, MessageCircle, FileText, Settings, Clock, RefreshCw } from 'lucide-react';
 
+// Logos optimizados para marcas de agua térmicas
 const logos = {
   cfe: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2A10,10 0 1,1 2,12A10,10 0 0,1 12,2M12,4A8,8 0 1,0 20,12A8,8 0 0,0 12,4M12,6A6,6 0 1,1 6,12A6,6 0 0,1 12,6M12,8A4,4 0 1,0 16,12A4,4 0 0,0 12,8M12,10A2,2 0 1,1 10,12A2,2 0 0,1 12,10Z" /></svg>,
   agua: <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12,2C8,2 4,6 4,12C4,16.42 7.58,20 12,20C16.42,20 20,16.42 20,12C20,6 16,2 12,2M12,4C16.42,4 20,7.58 20,12C20,16.42 16.42,20 12,20C7.58,20 4,16.42 4,12C4,7.58 7.58,4 12,4M12,6A6,6 0 1,0 18,12A6,6 0 0,0 12,6M12,8A4,4 0 1,1 8,12A4,4 0 0,1 12,8M12,10A2,2 0 1,0 14,12A2,2 0 0,0 12,10Z" /></svg>,
@@ -89,49 +90,47 @@ const App = () => {
   return (
     <div className="main-wrapper min-h-screen bg-gray-100 flex flex-col md:flex-row font-sans">
       
-      {/* CORRECCIÓN EXTREMA DE ESTILOS DE IMPRESIÓN */}
+      {/* ESTILOS DE IMPRESIÓN MEJORADOS PARA TÉRMICAS 80MM */}
       <style>{`
         @media print {
-          /* 1. Resetear la página y el fondo */
-          @page { margin: 0 !important; }
+          @page { 
+            margin: 0 !important; 
+            size: 80mm auto; 
+          }
           html, body { 
             background-color: white !important; 
             margin: 0 !important; 
-            padding: 0 !important; 
+            padding: 0 !important;
             height: auto !important;
           }
-          
-          /* 2. Ocultar todo por defecto usando visibility para evitar que colapse el layout */
-          body * {
-            visibility: hidden;
+          .form-panel, button {
+            display: none !important;
           }
-          
-          /* 3. Hacer visible SOLAMENTE el área de impresión y sus hijos */
-          .print-area, .print-area * {
-            visibility: visible;
-          }
-          
-          /* 4. Arrancar el ticket de su lugar y pegarlo arriba a la izquierda */
-          .print-area {
-            position: absolute !important;
-            top: 0 !important;
-            left: 0 !important;
-            width: 76mm !important; /* Ligeramente menor a 80mm para evitar cortes */
+          .main-wrapper, .preview-panel {
+            display: block !important;
+            width: 100% !important;
             margin: 0 !important;
-            padding: 2mm 4mm !important;
+            padding: 0 !important;
+            background: white !important;
+          }
+          .print-area {
+            position: relative !important;
+            width: 76mm !important;
+            margin: 0 !important;
+            padding: 4mm 2mm !important;
             box-shadow: none !important;
             color: black !important;
+            font-family: 'Courier New', Courier, monospace !important;
           }
-
-          /* 5. Asegurar que las marcas de agua mantengan su posición relativa dentro del ticket */
           .watermark {
             position: absolute !important; 
             top: 50% !important; 
             left: 50% !important; 
             transform: translate(-50%, -50%) !important; 
-            opacity: 0.05 !important; 
-            width: 70% !important; 
+            opacity: 0.15 !important; 
+            width: 60% !important; 
             z-index: 0 !important; 
+            filter: grayscale(100%) !important;
           }
         }
       `}</style>
@@ -177,13 +176,11 @@ const App = () => {
             </div>
 
             <div className="flex gap-2 p-3 bg-gray-50 rounded-lg">
-                <div className="flex-1">
-                    <span className="text-xs text-gray-500">Folio: {folio}</span>
-                    <button onClick={generateFolio} className="ml-2"><RefreshCw size={12}/></button>
+                <div className="flex-1 text-xs text-gray-500">
+                    Folio: {folio} <button onClick={generateFolio} className="ml-1"><RefreshCw size={10}/></button>
                 </div>
-                <div className="flex-1 text-right">
-                    <span className="text-xs text-gray-500">{date}</span>
-                    <button onClick={updateDate} className="ml-2"><Clock size={12}/></button>
+                <div className="flex-1 text-right text-xs text-gray-500">
+                    {date} <button onClick={updateDate} className="ml-1"><Clock size={10}/></button>
                 </div>
             </div>
           </div>
@@ -215,9 +212,9 @@ const App = () => {
               <div className="flex justify-between"><span>FECHA:</span><span>{date.split(',')[0]}</span></div>
               <div className="flex justify-between"><span>HORA:</span><span>{date.split(',')[1]?.trim() || ''}</span></div>
               <div className="flex justify-between"><span>FOLIO:</span><span>{folio}</span></div>
-              <div className="border-t border-dashed border-gray-400 my-2 pt-2">SERVICIO:</div>
+              <div className="border-t border-dashed border-gray-400 my-2 pt-2 uppercase text-[10px]">Servicio:</div>
               <div className="font-bold text-[13px] uppercase leading-tight">{serviceName || '-'}</div>
-              <div className="border-t border-dashed border-gray-400 my-2 pt-2">CUENTA:</div>
+              <div className="border-t border-dashed border-gray-400 my-2 pt-2 uppercase text-[10px]">Cuenta:</div>
               <div className="font-bold text-[13px] break-all">{account || '-'}</div>
             </div>
             <p className="text-center my-2">-------------------------</p>
@@ -228,8 +225,7 @@ const App = () => {
             </div>
             <div className="text-center mt-6 text-[10px]">
               <p className="font-bold">*** PAGO EXITOSO ***</p>
-              <p className="mt-2">Conserve este ticket para</p>
-              <p>cualquier aclaración.</p>
+              <p className="mt-2">Conserve este ticket para aclaraciones.</p>
               <p className="mt-2 mb-4 font-bold">¡Gracias por su preferencia!</p>
             </div>
           </div>
